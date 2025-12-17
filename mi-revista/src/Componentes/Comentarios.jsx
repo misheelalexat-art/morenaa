@@ -1,5 +1,3 @@
-// COMPONENTE COMENTARIOS – VERSIÓN FINAL PRO (MARKETING / MORENA)
-
 import { useState, useEffect } from "react";
 import { db } from "../firebase";
 import {
@@ -33,6 +31,7 @@ function Comentarios({ articuloId, autorUid }) {
   const [lastVisible, setLastVisible] = useState(null);
   const [cargandoMas, setCargandoMas] = useState(false);
   const [respondiendoA, setRespondiendoA] = useState(null);
+  const [alerta, setAlerta] = useState(null); // ✅ Nueva alerta
 
   // 🔄 Borrador + nombre
   useEffect(() => {
@@ -67,29 +66,42 @@ function Comentarios({ articuloId, autorUid }) {
     return () => unsub();
   }, [articuloId]);
 
-  // ✍️ Enviar
+  // ✍️ Enviar con alertas
   const enviarComentario = async () => {
-    if (!comentario.trim()) return;
+    if (!comentario.trim()) {
+      setAlerta({ tipo: "error", mensaje: "No puedes enviar un comentario vacío." });
+      setTimeout(() => setAlerta(null), 3000);
+      return;
+    }
 
-    const user = auth.currentUser;
-    const nombreFinal = user?.displayName || nombreLocal || "Visitante";
+    try {
+      const user = auth.currentUser;
+      const nombreFinal = user?.displayName || nombreLocal || "Visitante";
 
-    localStorage.setItem("nombre_usuario_local", nombreFinal);
+      localStorage.setItem("nombre_usuario_local", nombreFinal);
 
-    await addDoc(collection(db, "comentarios"), {
-      texto: comentario,
-      articuloId,
-      usuario: nombreFinal,
-      uid: user?.uid || null,
-      foto: user?.photoURL || null,
-      parentId: respondiendoA,
-      fecha: serverTimestamp(),
-      likes: [],
-    });
+      await addDoc(collection(db, "comentarios"), {
+        texto: comentario,
+        articuloId,
+        usuario: nombreFinal,
+        uid: user?.uid || null,
+        foto: user?.photoURL || null,
+        parentId: respondiendoA,
+        fecha: serverTimestamp(),
+        likes: [],
+      });
 
-    setComentario("");
-    setRespondiendoA(null);
-    localStorage.removeItem(`coment_temp_${articuloId}`);
+      setComentario("");
+      setRespondiendoA(null);
+      localStorage.removeItem(`coment_temp_${articuloId}`);
+
+      setAlerta({ tipo: "success", mensaje: "¡Comentario publicado correctamente!" });
+      setTimeout(() => setAlerta(null), 3000);
+    } catch (err) {
+      console.error(err);
+      setAlerta({ tipo: "error", mensaje: "Ocurrió un error al enviar tu comentario." });
+      setTimeout(() => setAlerta(null), 3000);
+    }
   };
 
   // ✏️ Editar
@@ -107,7 +119,11 @@ function Comentarios({ articuloId, autorUid }) {
 
   // 👍 Like
   const toggleLike = async (id, likes = []) => {
-    if (!auth.currentUser) return alert("Inicia sesión para dar like");
+    if (!auth.currentUser) {
+      setAlerta({ tipo: "error", mensaje: "Inicia sesión para dar like." });
+      setTimeout(() => setAlerta(null), 3000);
+      return;
+    }
 
     const ref = doc(db, "comentarios", id);
     likes.includes(auth.currentUser.uid)
@@ -218,6 +234,17 @@ function Comentarios({ articuloId, autorUid }) {
   return (
     <div className="mt-14">
       <h3 className="text-2xl font-extrabold mb-4">💬 Comentarios</h3>
+
+      {/* ALERTA */}
+      {alerta && (
+        <div
+          className={`mb-3 p-3 rounded-xl text-white font-bold ${
+            alerta.tipo === "success" ? "bg-green-500" : "bg-red-500"
+          }`}
+        >
+          {alerta.mensaje}
+        </div>
+      )}
 
       {!auth.currentUser && (
         <input

@@ -1,20 +1,15 @@
 import { useState, useEffect } from "react";
-import { db, auth, storage } from "../firebase";
+import { db, auth } from "../firebase";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
-import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 
 function CrearArticulo() {
   const [titulo, setTitulo] = useState("");
-  const [contenido, setContenido] = useState("");
   const [categoria, setCategoria] = useState("");
   const [tags, setTags] = useState("");
   const [mensaje, setMensaje] = useState("");
 
-  // IMAGEN
-  const [file, setFile] = useState(null);
-  const [preview, setPreview] = useState(null);
-  const [progreso, setProgreso] = useState(0);
-  const [subiendo, setSubiendo] = useState(false);
+  // Contenido
+  const [editableContenido, setEditableContenido] = useState("");
 
   const categorias = [
     "Moda Morena",
@@ -25,59 +20,14 @@ function CrearArticulo() {
     "Estilo de Vida",
   ];
 
-  // Editor de texto rico (básico)
-  const [editableContenido, setEditableContenido] = useState("");
-
-  useEffect(() => {
-    if (!file) return setPreview(null);
-    const url = URL.createObjectURL(file);
-    setPreview(url);
-    return () => URL.revokeObjectURL(url);
-  }, [file]);
-
-  const subirImagen = () => {
-    return new Promise((resolve) => {
-      if (!file) return resolve(null);
-
-      const uid = auth.currentUser.uid;
-      const imgRef = ref(
-        storage,
-        `portadas/${uid}_${Date.now()}_${file.name}`
-      );
-
-      const uploadTask = uploadBytesResumable(imgRef, file);
-      setSubiendo(true);
-
-      uploadTask.on(
-        "state_changed",
-        (snap) => {
-          setProgreso(
-            Math.round((snap.bytesTransferred / snap.totalBytes) * 100)
-          );
-        },
-        (err) => {
-          console.error(err);
-          setSubiendo(false);
-        },
-        async () => {
-          const url = await getDownloadURL(uploadTask.snapshot.ref);
-          setSubiendo(false);
-          resolve(url);
-        }
-      );
-    });
-  };
-
+  // PUBLICAR ARTÍCULO (FIRESTORE SIN STORAGE)
   const publicarArticulo = async () => {
-    if (!titulo || !contenido || !categoria || !file) {
-      setMensaje("❗ Completa los campos obligatorios");
-      return;
-    }
-
     const user = auth.currentUser;
     if (!user) return alert("Debes iniciar sesión");
 
-    const portadaURL = await subirImagen();
+    if (!titulo || !editableContenido || !categoria) {
+      return setMensaje("❌ Completa título, contenido y categoría");
+    }
 
     await addDoc(collection(db, "articulos"), {
       titulo,
@@ -85,40 +35,37 @@ function CrearArticulo() {
       descripcion: editableContenido.slice(0, 120) + "...",
       categoria,
       tags: tags ? tags.split(",").map((t) => t.trim()) : [],
-      portada: portadaURL,
       autorId: user.uid,
       fecha: serverTimestamp(),
       vistas: 0,
       likes: 0,
-      estado: "publicado", // Estado del artículo
+      estado: "publicado",
     });
 
     setMensaje("✔ Artículo publicado");
+
+    // Limpiar formulario
     setTitulo("");
-    setContenido("");
+    setEditableContenido("");
     setCategoria("");
     setTags("");
-    setFile(null);
-    setPreview(null);
-    setProgreso(0);
-    setEditableContenido(""); // Limpia el contenido
   };
 
   // Guardar borrador en localStorage
   useEffect(() => {
     localStorage.setItem(
       "borradorArticulo",
-      JSON.stringify({ titulo, contenido, categoria, tags })
+      JSON.stringify({ titulo, editableContenido, categoria, tags })
     );
-  }, [titulo, contenido, categoria, tags]);
+  }, [titulo, editableContenido, categoria, tags]);
 
-  // Cargar borrador al inicio
+  // Cargar borrador
   useEffect(() => {
     const draft = localStorage.getItem("borradorArticulo");
     if (draft) {
       const d = JSON.parse(draft);
       setTitulo(d.titulo || "");
-      setContenido(d.contenido || "");
+      setEditableContenido(d.editableContenido || "");
       setCategoria(d.categoria || "");
       setTags(d.tags || "");
     }
@@ -147,7 +94,9 @@ function CrearArticulo() {
         onChange={(e) => setTitulo(e.target.value)}
         maxLength={80}
       />
-      <p className="text-xs text-gray-500">{titulo.length}/80 caracteres</p>
+      <p className="text-xs text-gray-500 mb-4">
+        {titulo.length}/80 caracteres
+      </p>
 
       <select
         className="w-full border p-2 rounded mb-4"
@@ -160,59 +109,32 @@ function CrearArticulo() {
         ))}
       </select>
 
-      {/* Editor de texto rico */}
       <textarea
-        className="w-full border p-2 rounded mb-4 h-40"
+        className="w-full border p-2 rounded mb-4 h-48"
         placeholder="Contenido del artículo"
         value={editableContenido}
         onChange={(e) => setEditableContenido(e.target.value)}
       />
 
-      <p className="text-sm text-gray-500 mb-2">
-        Palabras: {editableContenido.trim().split(/\s+/).length}
+      <p className="text-sm text-gray-500 mb-4">
+        Palabras:{" "}
+        {editableContenido.trim()
+          ? editableContenido.trim().split(/\s+/).length
+          : 0}
       </p>
 
       <input
-        className="w-full border p-2 rounded mb-4"
+        className="w-full border p-2 rounded mb-6"
         placeholder="Tags (moda, autoestima...)"
         value={tags}
         onChange={(e) => setTags(e.target.value)}
       />
 
-      {/* Subir portada */}
-      <label className="block border-2 border-dashed p-6 text-center rounded cursor-pointer hover:bg-gray-50">
-        {file ? "Cambiar portada" : "Subir portada"}
-        <input
-          type="file"
-          accept="image/*"
-          onChange={(e) => setFile(e.target.files[0])}
-          className="hidden"
-        />
-      </label>
-
-      {preview && (
-        <img
-          src={preview}
-          alt="preview"
-          className="w-full h-64 object-cover rounded mb-4"
-        />
-      )}
-
-      {subiendo && (
-        <p className="text-sm mb-4">Subiendo imagen: {progreso}%</p>
-      )}
-
-      {/* Botón de publicación */}
       <button
         onClick={publicarArticulo}
-        disabled={subiendo}
-        className={`w-full py-2 rounded font-semibold ${
-          subiendo
-            ? "bg-gray-400 cursor-not-allowed"
-            : "bg-black text-white hover:bg-gray-800"
-        }`}
+        className="w-full py-2 rounded font-semibold bg-black text-white hover:bg-gray-800"
       >
-        {subiendo ? "Publicando..." : "Publicar artículo"}
+        Publicar artículo
       </button>
     </div>
   );

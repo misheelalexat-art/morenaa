@@ -1,6 +1,7 @@
 import { useParams, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import ArticulosData from "./ArticulosData";
 import Recomendaciones from "./Recomendaciones";
 import CompartirRedes from "./CompartirRedes";
 import Comentarios from "./Comentarios";
@@ -9,148 +10,126 @@ function ArticuloCompleto() {
   const { id } = useParams();
   const [articulo, setArticulo] = useState(null);
   const [likes, setLikes] = useState(0);
-  const [esFavorito, setEsFavorito] = useState(false);
+
+  const usuarioPremium = localStorage.getItem("usuarioPremium") === "true";
 
   useEffect(() => {
-    const almacenados = JSON.parse(localStorage.getItem("articulos")) || [];
-    const encontrado = almacenados.find((a) => a.id === Number(id));
-    setArticulo(encontrado);
+    const almacenados =
+      JSON.parse(localStorage.getItem("articulos")) || ArticulosData;
 
+    const encontrado = almacenados.find((a) => a.id === Number(id));
     if (!encontrado) return;
 
-  const likeData =
-  JSON.parse(localStorage.getItem(`likes_${encontrado.id}`)) || {
-    total: 0,
-    liked: false,
-  };
+    setArticulo(encontrado);
 
-setLikes(likeData.total);
+    const actualizados = almacenados.map((a) =>
+      a.id === encontrado.id
+        ? { ...a, vistas: (a.vistas || 0) + 1 }
+        : a
+    );
+    localStorage.setItem("articulos", JSON.stringify(actualizados));
 
-
-    const favoritos = JSON.parse(localStorage.getItem("favoritos")) || [];
-    setEsFavorito(favoritos.some((f) => f.id === encontrado.id));
+    const likeData =
+      JSON.parse(localStorage.getItem(`likes_${encontrado.id}`)) || {
+        total: 0,
+      };
+    setLikes(likeData.total);
 
     window.scrollTo(0, 0);
   }, [id]);
 
-  if (!articulo)
-    return <p className="text-center mt-10">Artículo no encontrado</p>;
-
   const manejarLike = () => {
     const nuevo = likes + 1;
     setLikes(nuevo);
-    localStorage.setItem(`likes_${articulo.id}`, JSON.stringify(nuevo));
+    localStorage.setItem(
+      `likes_${articulo.id}`,
+      JSON.stringify({ total: nuevo })
+    );
   };
 
-  const manejarFavorito = () => {
-    const favoritos = JSON.parse(localStorage.getItem("favoritos")) || [];
+  if (!articulo) return <p>Artículo no encontrado</p>;
 
-    if (esFavorito) {
-      const filtrados = favoritos.filter((f) => f.id !== articulo.id);
-      localStorage.setItem("favoritos", JSON.stringify(filtrados));
-      setEsFavorito(false);
-    } else {
-      favoritos.push(articulo);
-      localStorage.setItem("favoritos", JSON.stringify(favoritos));
-      setEsFavorito(true);
-    }
-  };
+  const esPremiumBloqueado = articulo.premium && !usuarioPremium;
+
+  if (esPremiumBloqueado) {
+    return (
+      <div className="max-w-xl mx-auto px-6 py-12 text-center">
+        <h2 className="text-2xl sm:text-3xl font-bold mb-4">
+          🔒 Contenido Premium
+        </h2>
+        <p className="mb-6 text-gray-600">
+          Suscríbete para acceder a este artículo exclusivo.
+        </p>
+
+        <button
+          onClick={() => localStorage.setItem("usuarioPremium", "true")}
+          className="bg-black text-white px-6 py-3 rounded-full font-semibold"
+        >
+          Activar Premium (demo)
+        </button>
+
+        <Link
+          to="/articulos"
+          className="block mt-6 text-blue-600 hover:underline"
+        >
+          ← Volver
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 30 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6 }}
-      className="max-w-4xl mx-auto p-6"
+      className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6"
     >
-      {/* Imagen principal */}
-      <div className="relative mb-8">
-        <img
-          src={articulo.imagen}
-          alt={articulo.titulo}
-          className="w-full h-80 object-cover rounded-2xl shadow-lg"
-        />
+      {/* IMAGEN RESPONSIVE */}
+      <img
+        src={articulo.imagen}
+        alt={articulo.titulo}
+        className="w-full h-[220px] sm:h-[320px] lg:h-[420px] object-cover rounded-xl mb-6"
+      />
 
-        {/* Categoría */}
-        {articulo.categoria && (
-          <span className="absolute top-4 left-4 bg-yellow-400 text-black font-bold px-4 py-1 rounded-full shadow">
-            {articulo.categoria}
+      {/* TITULO */}
+      <div className="flex flex-wrap items-center gap-2 mb-3">
+        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold leading-tight">
+          {articulo.titulo}
+        </h1>
+        {articulo.premium && (
+          <span className="bg-yellow-400 text-black px-3 py-1 rounded-full text-xs font-semibold">
+            Premium 🔒
           </span>
         )}
       </div>
 
-      {/* Título */}
-      <h1 className="text-4xl font-extrabold leading-tight mb-2">
-        {articulo.titulo}
-      </h1>
-
-      {/* Autor */}
-      <p className="text-sm text-gray-500 mb-6">
-        ✍ {articulo.autor || "Equipo Morena"} · {articulo.fecha}
+      {/* DESCRIPCIÓN */}
+      <p className="text-sm sm:text-base text-gray-700 italic mb-4">
+        {articulo.descripcion}
       </p>
 
-      {/* Acciones */}
-      <div className="flex flex-wrap items-center gap-4 mb-6">
-        <button
-          onClick={manejarLike}
-          className="px-5 py-2 rounded-full bg-pink-500 text-white font-semibold hover:bg-pink-600 transition"
-        >
-          ❤️ Me gusta ({likes})
-        </button>
+      {/* LIKE */}
+      <button
+        onClick={manejarLike}
+        className="mb-4 bg-red-100 text-red-600 px-4 py-2 rounded-full text-sm"
+      >
+        ❤️ {likes}
+      </button>
 
-        <button
-          onClick={manejarFavorito}
-          className={`px-5 py-2 rounded-full font-semibold transition ${
-            esFavorito
-              ? "bg-yellow-400 text-black"
-              : "bg-gray-200 hover:bg-gray-300"
-          }`}
-        >
-          {esFavorito ? "⭐ En favoritos" : "☆ Guardar"}
-        </button>
-      </div>
-
-      {/* Tags */}
-      <div className="flex gap-2 flex-wrap mb-8">
-        {articulo.tags?.map((tag, i) => (
-          <span
-            key={i}
-            className="px-3 py-1 bg-[#41644A]/10 text-[#41644A] rounded-full text-sm font-medium"
-          >
-            #{tag}
-          </span>
+      {/* CONTENIDO */}
+      <div className="prose prose-sm sm:prose-base lg:prose-lg max-w-none mt-6">
+        {articulo.contenido.split("\n").map((linea, i) => (
+          <p key={i}>{linea}</p>
         ))}
       </div>
 
-      {/* Contenido */}
-      <article className="prose prose-lg max-w-none text-gray-800 leading-relaxed">
-        {articulo.contenido}
-      </article>
-
-      {/* Compartir */}
-      <div className="mt-10">
+      {/* EXTRA */}
+      <div className="mt-10 space-y-8">
         <CompartirRedes titulo={articulo.titulo} />
+        <Comentarios articuloId={articulo.id} />
+        <Recomendaciones categoria={articulo.categoria} />
       </div>
 
-      {/* Comentarios */}
-      <div className="mt-14">
-        <Comentarios articuloId={id} />
-      </div>
-
-      {/* Recomendaciones */}
-      <div className="mt-16">
-        <Recomendaciones
-          categoria={articulo.categoria}
-          idActual={articulo.id}
-        />
-      </div>
-
-      {/* Volver */}
-      <Link
-        to="/articulos"
-        className="block mt-16 text-center text-[#41644A] font-semibold hover:underline"
-      >
-        ← Volver a artículos
+      <Link to="/articulos" className="inline-block mt-8 text-blue-600">
+        ← Volver
       </Link>
     </motion.div>
   );

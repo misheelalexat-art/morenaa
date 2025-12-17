@@ -3,7 +3,6 @@ import { db, auth } from "../firebase";
 import {
   collection,
   query,
-  where,
   onSnapshot,
   deleteDoc,
   doc,
@@ -13,82 +12,59 @@ import { useNavigate } from "react-router-dom";
 function ArticulosDelUsuario() {
   const [articulos, setArticulos] = useState([]);
   const [cargando, setCargando] = useState(true);
-  const [user, setUser] = useState(null);
   const navigate = useNavigate();
+  const user = auth.currentUser;
 
-  // 1️⃣ Detectar usuario logueado
+  // 🔥 Traer TODOS los artículos
   useEffect(() => {
-    const unsub = auth.onAuthStateChanged((u) => {
-      setUser(u);
-    });
-    return unsub;
-  }, []);
-
-  // 2️⃣ Traer artículos del usuario
-  useEffect(() => {
-    if (!user) return;
-
-    const q = query(
-      collection(db, "articulos"),
-      where("autor", "==", user.uid)
-    );
+    const q = query(collection(db, "articulos"));
 
     const unsub = onSnapshot(q, (snap) => {
-      const lista = snap.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
+      const lista = snap.docs.map((d) => ({
+        id: d.id,
+        ...d.data(),
       }));
       setArticulos(lista);
       setCargando(false);
     });
 
     return unsub;
-  }, [user]);
+  }, []);
 
   // 🗑 Eliminar artículo
   const eliminarArticulo = async (id) => {
     const confirmar = window.confirm(
-      "¿Seguro que deseas eliminar este artículo? Esta acción no se puede deshacer."
+      "¿Seguro que deseas eliminar este artículo?"
     );
 
     if (!confirmar) return;
 
     try {
       await deleteDoc(doc(db, "articulos", id));
-      alert("Artículo eliminado correctamente 🗑️");
+      alert("Artículo eliminado 🗑️");
     } catch (error) {
       console.error(error);
-      alert("Error al eliminar el artículo");
+      alert("Error al eliminar");
     }
   };
 
-  if (cargando) return <p>Cargando artículos...</p>;
+  if (cargando) return <p className="text-center">Cargando artículos...</p>;
 
   return (
-    <div className="mt-8 max-w-4xl mx-auto">
+    <div className="mt-10 max-w-4xl mx-auto px-4">
       <h2 className="text-2xl font-extrabold mb-6">
-        📝 Mis artículos publicados
+        📚 Todos los artículos publicados
       </h2>
 
       {articulos.length === 0 ? (
-        <p className="text-gray-600">
-          Aún no has publicado ningún artículo.
-        </p>
+        <p className="text-gray-600">No hay artículos aún.</p>
       ) : (
         articulos.map((a) => (
           <div
             key={a.id}
-            className="bg-white p-5 border rounded-2xl mb-6 shadow-sm"
+            className="bg-white p-6 border rounded-2xl mb-6 shadow-sm"
           >
-            {a.portada && (
-              <img
-                src={a.portada}
-                alt="portada"
-                className="w-full h-48 object-cover rounded-xl mb-3"
-              />
-            )}
-
-            <h3 className="font-bold text-xl mb-1">{a.titulo}</h3>
+            <h3 className="font-bold text-xl mb-2">{a.titulo}</h3>
 
             <p className="text-sm text-gray-700 line-clamp-3">
               {a.descripcion}
@@ -98,8 +74,7 @@ function ArticulosDelUsuario() {
               Categoría: {a.categoria}
             </p>
 
-            {/* 🎯 ACCIONES */}
-            <div className="flex gap-5 mt-4 text-sm font-semibold">
+            <div className="flex gap-6 mt-4 text-sm font-semibold">
               <button
                 className="text-green-700 hover:underline"
                 onClick={() => navigate(`/articulo/${a.id}`)}
@@ -107,19 +82,23 @@ function ArticulosDelUsuario() {
                 👁 Ver
               </button>
 
-              <button
-                className="text-blue-600 hover:underline"
-                onClick={() => navigate(`/editar-articulo/${a.id}`)}
-              >
-                ✏️ Editar
-              </button>
+              {user?.uid === a.autorId && (
+                <>
+                  <button
+                    className="text-blue-600 hover:underline"
+                    onClick={() => navigate(`/editar-articulo/${a.id}`)}
+                  >
+                    ✏️ Editar
+                  </button>
 
-              <button
-                className="text-red-600 hover:underline"
-                onClick={() => eliminarArticulo(a.id)}
-              >
-                🗑 Eliminar
-              </button>
+                  <button
+                    className="text-red-600 hover:underline"
+                    onClick={() => eliminarArticulo(a.id)}
+                  >
+                    🗑 Eliminar
+                  </button>
+                </>
+              )}
             </div>
           </div>
         ))

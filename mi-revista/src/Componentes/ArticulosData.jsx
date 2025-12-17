@@ -63,6 +63,7 @@ y equilibrar prendas llamativas con otras más neutras.`
 Los jeans correctos realzan tu figura y te hacen sentir cómoda.
 No sigas reglas estrictas: usa lo que te haga sentir bien.`
 },
+
 {
   id: 6,
   titulo: "Ropa minimalista para chicas morenas",
@@ -669,7 +670,8 @@ La educación financiera empieza temprano.`
   fecha: "2025",
   contenido: `Ser buena estudiante no es perfección.
 Encuentra tu ritmo y cuida tu bienestar.
-Aprender también debe ser un proceso sano.`
+Aprender también debe ser un proceso sano.`,
+ vistas: 862,
 },
 {
   id: 56,
@@ -681,7 +683,8 @@ Aprender también debe ser un proceso sano.`
   fecha: "2025",
   contenido: `Tener metas claras te da dirección.
 Hazlas realistas y alcanzables.
-Cada paso cuenta en tu crecimiento.`
+Cada paso cuenta en tu crecimiento.`,
+ vistas: 7565,
 },
 {
   id: 57,
@@ -693,7 +696,8 @@ Cada paso cuenta en tu crecimiento.`
   fecha: "2025",
   contenido: `Una rutina saludable incluye descanso.
 Alimentación, movimiento y mente en equilibrio.
-Escúchate y respeta tus tiempos.`
+Escúchate y respeta tus tiempos.`,
+ vistas: 678,
 },
 {
   id: 58,
@@ -717,19 +721,191 @@ La organización potencia tu talento.`
   fecha: "2025",
   contenido: `Leer abre la mente y el corazón.
 Los libros inspiran, enseñan y acompañan.
-Cada historia deja una huella.`
+Cada historia deja una huella.`,
+ vistas: 700,
 },
-{
-  id: 60,
-  titulo: "Cómo mejorar tu energía diaria",
-  categoria: "Estilo de Vida",
-  descripcion: "Hábitos sencillos para sentirte mejor.",
-  imagen: "/60.jpg",
-  autor: "Revista Morena",
-  fecha: "2025",
-  contenido: `Tu energía depende de tus hábitos.
+ {
+    id: 60,
+    titulo: "Cómo mejorar tu energía diaria",
+    categoria: "Estilo de Vida",
+    descripcion: "Hábitos sencillos para sentirte mejor.",
+    imagen: "/60.jpg",
+    autor: "Revista Morena",
+    fecha: "2025",
+    contenido: `Tu energía depende de tus hábitos.
 Dormir bien y cuidar tu mente es clave.
-Pequeños cambios hacen grandes diferencias.`
-}]
+Pequeños cambios hacen grandes diferencias.`,
+    vistas: 0,
+    likes: 0,
+    premium: false,
+    patrocinado: false,
+  },
+  {
+    id: 61,
+    titulo: "El poder de la piel morena en la moda actual",
+    categoria: "Moda Morena",
+    descripcion: "Celebra tu identidad y estilo único.",
+    autor: "Equipo Morena",
+    fecha: "10 Dic 2025",
+    imagen: "/61.jpg",
+    contenido: `La piel morena ha dejado de ser invisibilizada en la industria de la moda.
+Hoy celebramos su fuerza, elegancia y presencia en pasarelas y campañas.`,
+    tags: ["moda", "identidad", "morena"],
+    vistas: 0,
+    likes: 0,
+    premium: false,
+    patrocinado: false,
+  },
+  {
+    id: 62,
+    titulo: "Rutina de skincare para piel morena luminosa",
+    categoria: "Belleza y Skin Care",
+    descripcion: "Potencia tu brillo natural.",
+    autor: "Dermocosmética Latina",
+    fecha: "12 Dic 2025",
+    imagen: "/62.jpg",
+    contenido: `La piel morena tiene necesidades específicas.
+Esta rutina te ayudará a proteger y potenciar tu brillo natural.`,
+    tags: ["skincare", "belleza"],
+    vistas: 0,
+    likes: 0,
+    premium: true,
+    precio: 5,
+    patrocinado: true,
+  },
+  {
+    id: 63,
+    titulo: "Autoestima: aprender a mirarte con amor",
+    categoria: "Autoestima",
+    descripcion: "Construye tu autoestima día a día.",
+    autor: "Psicología Morena",
+    fecha: "14 Dic 2025",
+    imagen: "/63.jpg",
+    contenido: `La autoestima se construye todos los días.
+Este artículo te acompaña en ese proceso.`,
+    tags: ["amor propio", "autoestima"],
+    vistas: 3456,
+    likes: 0,
+    premium: false,
+    patrocinado: false,
+  },
+  {
+    id: 64,
+    titulo: "Cómo vestir elegante resaltando tu tono de piel",
+    categoria: "Moda Morena",
+    descripcion: "Colores y combinaciones que favorecen.",
+    autor: "Estilismo Morena",
+    fecha: "15 Dic 2025",
+    imagen: "/64.jpg",
+    contenido: `Aprende qué colores favorecen más a la piel morena
+y cómo combinarlos con elegancia.`,
+    tags: ["estilo", "moda"],
+    vistas: 0,
+    likes: 0,
+    premium: true,
+    precio: 7,
+    patrocinado: false,
+  },
+  {
+    id: 65,
+    titulo: "Cultura latina: belleza que viene de nuestras raíces",
+    categoria: "Cultura Latina",
+    descripcion: "Celebra tu herencia y origen.",
+    autor: "Revista Morena",
+    fecha: "16 Dic 2025",
+    imagen: "/65.jpg",
+    contenido: `Nuestra belleza nace de la historia y la herencia latina.
+Celebrar lo nuestro es resistir.`,
+    tags: ["cultura", "latina"],
+    vistas: 0,
+    likes: 0,
+    premium: false,
+    patrocinado: false,
+  },
+  {
+    id: 66,
+    titulo: "Guía exclusiva: construye tu marca personal morena",
+    categoria: "Estilo de Vida",
+    descripcion: "Impulsa tu crecimiento profesional.",
+    autor: "Morena Pro",
+    fecha: "17 Dic 2025",
+    imagen: "/66.jpg",
+    contenido: `Guía práctica para mujeres morenas que quieren crecer
+y posicionarse profesionalmente.`,
+    tags: ["emprendimiento", "marca personal"],
+    vistas: 5670,
+    likes: 6000,
+    premium: true,
+    precio: 12,
+    patrocinado: false,
+  },
+  {
+    id: 67,
+    titulo: "Maquillaje natural que realza la piel morena",
+    categoria: "Belleza y Skin Care",
+    descripcion: "Resalta tu belleza natural.",
+    autor: "Makeup Morena",
+    fecha: "18 Dic 2025",
+    imagen: "/67.jpg",
+    contenido: `El maquillaje no tapa, resalta.
+Aprende técnicas que favorecen la piel morena.`,
+    tags: ["maquillaje", "belleza"],
+    vistas: 0,
+    likes: 0,
+    premium: false,
+    patrocinado: true,
+  },
+  {
+    id: 68,
+    titulo: "Romper estereotipos siendo mujer morena",
+    categoria: "Autoestima",
+    descripcion: "Identidad y amor propio.",
+    autor: "Editorial Morena",
+    fecha: "19 Dic 2025",
+    imagen: "/68.jpg",
+    contenido: `Ser morena en un mundo de estereotipos es un acto político.
+Aquí hablamos de resistencia y amor propio.`,
+    tags: ["identidad", "autoestima"],
+    vistas: 0,
+    likes: 0,
+    premium: true,
+    precio: 8,
+    patrocinado: false,
+  },
+  {
+    id: 69,
+    titulo: "Tendencias de moda que favorecen la piel morena",
+    categoria: "Tendencias",
+    descripcion: "Adapta las tendencias a tu tono de piel.",
+    autor: "Fashion Morena",
+    fecha: "20 Dic 2025",
+    imagen: "/69.jpg",
+    contenido: `Las tendencias también son nuestras.
+Descubre cómo adaptarlas a tu tono de piel.`,
+    tags: ["tendencias", "moda"],
+    vistas: 80000,
+    likes: 1000,
+    premium: true,
+    precio: 10,
+    patrocinado: false,
+  },
+  {
+    id: 70,
+    titulo: "Mentalidad de éxito para mujeres latinas",
+    categoria: "Estilo de Vida",
+    descripcion: "Construye una mentalidad fuerte y segura.",
+    autor: "Morena Mindset",
+    fecha: "21 Dic 2025",
+    imagen: "/70.jpg",
+    contenido: `El éxito empieza en la mente.
+Este artículo te guía a construir una mentalidad fuerte y segura.`,
+    tags: ["mentalidad", "crecimiento"],
+    vistas: 0,
+    likes: 0,
+    premium: true,
+    precio: 8,
+    patrocinado: false,
+  },
+];
 
 export default ArticulosData;

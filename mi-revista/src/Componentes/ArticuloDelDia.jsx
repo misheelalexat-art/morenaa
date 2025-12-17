@@ -13,7 +13,7 @@ function ArticuloDelDia({ articulos }) {
 
   // 🎯 Elegir artículo del día
   useEffect(() => {
-    if (!articulos?.length) return;
+    if (articuloDelDia || !articulos?.length) return; // evita doble selección
 
     const hoy = new Date().toDateString();
     const fecha = localStorage.getItem("articuloDia_fecha");
@@ -28,34 +28,37 @@ function ArticuloDelDia({ articulos }) {
     localStorage.setItem("articuloDia_fecha", hoy);
     localStorage.setItem("articuloDia_id", elegido.id);
     setArticuloDelDia(elegido);
-  }, [articulos]);
+  }, [articulos, articuloDelDia]);
 
   // 📊 Likes, comentarios y vistas
   useEffect(() => {
     if (!articuloDelDia) return;
 
+    // Likes
     const likeData =
       JSON.parse(localStorage.getItem(`likes_${articuloDelDia.id}`)) || {
         total: 0,
         liked: false,
       };
-
     setLikes(likeData.total);
     setLiked(likeData.liked);
 
+    // Comentarios
     setComentarios(
-      JSON.parse(
-        localStorage.getItem(`comentarios_${articuloDelDia.id}`)
-      ) || []
+      JSON.parse(localStorage.getItem(`comentarios_${articuloDelDia.id}`)) || []
     );
 
-    const v =
-      parseInt(
-        localStorage.getItem(`vistas_${articuloDelDia.id}`)
-      ) || 0;
+    // Vistas (solo una vez por sesión)
+    const keyVistas = `vistas_${articuloDelDia.id}`;
+    const v = parseInt(localStorage.getItem(keyVistas)) || 0;
 
-    localStorage.setItem(`vistas_${articuloDelDia.id}`, v + 1);
-    setVistas(v + 1);
+    if (!sessionStorage.getItem(keyVistas)) {
+      localStorage.setItem(keyVistas, v + 1);
+      setVistas(v + 1);
+      sessionStorage.setItem(keyVistas, "contado");
+    } else {
+      setVistas(v);
+    }
   }, [articuloDelDia]);
 
   const toggleLike = () => {
@@ -74,10 +77,7 @@ function ArticuloDelDia({ articulos }) {
 
     const nuevos = [
       ...comentarios,
-      {
-        texto: nuevoComentario,
-        fecha: new Date().toLocaleDateString(),
-      },
+      { texto: nuevoComentario, fecha: new Date().toLocaleDateString() },
     ];
 
     setComentarios(nuevos);
@@ -120,9 +120,7 @@ function ArticuloDelDia({ articulos }) {
 
         {/* Contenido */}
         <div className="p-8">
-          <p className="text-sm text-gray-500 mb-2">
-            👀 {vistas} vistas
-          </p>
+          <p className="text-sm text-gray-500 mb-2">👀 {vistas} vistas</p>
 
           <h3 className="text-3xl font-extrabold leading-tight">
             {articuloDelDia.titulo}
@@ -149,7 +147,7 @@ function ArticuloDelDia({ articulos }) {
             Leer artículo completo →
           </Link>
 
-          {/* 💬 Comentarios rápidos */}
+          {/* 💬 Comentarios */}
           <div className="mt-10">
             <h4 className="font-bold mb-4 text-lg">💬 Comentarios</h4>
 
@@ -162,9 +160,7 @@ function ArticuloDelDia({ articulos }) {
             {comentarios.map((c, i) => (
               <div key={i} className="border-b py-2 text-sm">
                 {c.texto}
-                <span className="block text-xs text-gray-400">
-                  {c.fecha}
-                </span>
+                <span className="block text-xs text-gray-400">{c.fecha}</span>
               </div>
             ))}
 
